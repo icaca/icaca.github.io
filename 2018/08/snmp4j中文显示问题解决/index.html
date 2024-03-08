@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  
+  <title>SNMP4J 中文乱码问题解决 | caca&#39;s Blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="因为项目原因，用到了snmp trap，使用UDP 162端口来接收SNMP报警信息。在显示中文和日期时会出现乱码，具体原因网上写的比较多，我就不做解释了。从网上找了一部分代码，总有点问题，然后修修改改中文能显示了，但是遇到日期仍然有问题，然后又找了一部分代码，将其整合，终于解决了，先粘一下代码，后面如果改动了再作更新。 12345678910111213141516171819202122232">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SNMP4J 中文乱码问题解决">
+<meta property="og:url" content="https://www.icaca.net/2018/08/snmp4j%E4%B8%AD%E6%96%87%E6%98%BE%E7%A4%BA%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/index.html">
+<meta property="og:site_name" content="caca&#39;s Blog">
+<meta property="og:description" content="因为项目原因，用到了snmp trap，使用UDP 162端口来接收SNMP报警信息。在显示中文和日期时会出现乱码，具体原因网上写的比较多，我就不做解释了。从网上找了一部分代码，总有点问题，然后修修改改中文能显示了，但是遇到日期仍然有问题，然后又找了一部分代码，将其整合，终于解决了，先粘一下代码，后面如果改动了再作更新。 12345678910111213141516171819202122232">
+<meta property="og:locale">
+<meta property="article:published_time" content="2018-08-11T08:00:00.000Z">
+<meta property="article:modified_time" content="2018-11-21T05:07:15.000Z">
+<meta property="article:author" content="https:&#x2F;&#x2F;www.icaca.net">
+<meta property="article:tag" content="SNMP">
+<meta property="article:tag" content="JAVA">
+<meta property="article:tag" content="SNMP4J">
+<meta name="twitter:card" content="summary">
+  
+    <link rel="alternate" href="/atom.xml" title="caca's Blog" type="application/atom+xml">
+  
+  
+    <link rel="shortcut icon" href="/favicon.png">
+  
+  
+  
+<link rel="stylesheet" href="/css/style.css">
+
+  
+    
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.min.css">
+
+  
+  
+<meta name="generator" content="Hexo 7.1.1"></head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">caca&#39;s Blog</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">道法自然</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"><span class="fa fa-bars"></span></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+        
+          <a class="nav-icon" href="/atom.xml" title="RSS Feed"><span class="fa fa-rss"></span></a>
+        
+        <a class="nav-icon nav-search-btn" title="Suche"><span class="fa fa-search"></span></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Suche"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="https://www.icaca.net"></form>
+      </div>
+    </div>
+  </div>
+</header>
+
+      <div class="outer">
+        <section id="main"><article id="post-snmp4j中文显示问题解决" class="h-entry article article-type-post" itemprop="blogPost" itemscope itemtype="https://schema.org/BlogPosting">
+  <div class="article-meta">
+    <a href="/2018/08/snmp4j%E4%B8%AD%E6%96%87%E6%98%BE%E7%A4%BA%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/" class="article-date">
+  <time class="dt-published" datetime="2018-08-11T08:00:00.000Z" itemprop="datePublished">2018-08-11</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="p-name article-title" itemprop="headline name">
+      SNMP4J 中文乱码问题解决
+    </h1>
+  
+
+      </header>
+    
+    <div class="e-content article-entry" itemprop="articleBody">
+      
+        <p>因为项目原因，用到了snmp trap，使用UDP 162端口来接收SNMP报警信息。<br>在显示中文和日期时会出现乱码，具体原因网上写的比较多，我就不做解释了。<br>从网上找了一部分代码，总有点问题，然后修修改改中文能显示了，但是遇到日期仍然有问题，然后又找了一部分代码，将其整合，终于解决了，先粘一下代码，后面如果改动了再作更新。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 处理SNMP事件</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">processPdu</span><span class="params">(CommandResponderEvent event)</span> &#123;</span><br><span class="line">		System.out.println(<span class="string">&quot;processPdu&quot;</span>);</span><br><span class="line"></span><br><span class="line">		<span class="type">String</span> <span class="variable">version</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line">		<span class="type">String</span> <span class="variable">community</span> <span class="operator">=</span> <span class="literal">null</span>;</span><br><span class="line">		<span class="keyword">if</span> (event.getPDU().getType() == PDU.V1TRAP) &#123;</span><br><span class="line">			version = <span class="string">&quot;v1&quot;</span>;</span><br><span class="line">			community = <span class="keyword">new</span> <span class="title class_">String</span>(event.getSecurityName());</span><br><span class="line">		&#125; <span class="keyword">else</span> <span class="keyword">if</span> (event.getPDU().getType() == PDU.TRAP) &#123;</span><br><span class="line">			<span class="keyword">if</span> (event.getSecurityModel() == <span class="number">2</span>) &#123;</span><br><span class="line">				version = <span class="string">&quot;v2&quot;</span>;</span><br><span class="line">				community = <span class="keyword">new</span> <span class="title class_">String</span>(event.getSecurityName());</span><br><span class="line">			&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">				version = <span class="string">&quot;v3&quot;</span>;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="type">PDU</span> <span class="variable">pdu</span> <span class="operator">=</span> event.getPDU();</span><br><span class="line"></span><br><span class="line">		<span class="type">String</span> <span class="variable">output</span> <span class="operator">=</span> <span class="string">&quot;SNMP：[IP = &quot;</span> + event.getPeerAddress() + <span class="string">&quot;]&quot;</span>;</span><br><span class="line">		<span class="comment">// System.out.println(output);</span></span><br><span class="line"></span><br><span class="line">		<span class="keyword">if</span> (event != <span class="literal">null</span> &amp;&amp; event.getPDU() != <span class="literal">null</span>) &#123;</span><br><span class="line">			Vector&lt;VariableBinding&gt; recVBs = (Vector&lt;VariableBinding&gt;) pdu.getVariableBindings();</span><br><span class="line">			<span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; recVBs.size(); i++) &#123;</span><br><span class="line">				<span class="type">VariableBinding</span> <span class="variable">recVB</span> <span class="operator">=</span> recVBs.elementAt(i);</span><br><span class="line"></span><br><span class="line">				<span class="type">String</span> <span class="variable">des</span> <span class="operator">=</span> OID.get(recVB.getOid().toString()) + <span class="string">&quot; : &quot;</span> + getChinese(recVB.getVariable().toString());</span><br><span class="line">				<span class="comment">// System.out.println(des);</span></span><br><span class="line">				output += <span class="string">&quot;\n&quot;</span> + des;</span><br><span class="line"></span><br><span class="line">				<span class="comment">// &#125;</span></span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		System.out.println(output);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">	&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// octetString 转 二进制</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="type">int</span>[] octetStringToBytes(String value_ipar) &#123;</span><br><span class="line">	<span class="comment">// ---------------------------</span></span><br><span class="line">	<span class="comment">// Split string into its parts</span></span><br><span class="line">	<span class="comment">// ---------------------------</span></span><br><span class="line">	String[] bytes;</span><br><span class="line">	bytes = value_ipar.split(<span class="string">&quot;[^0-9A-Fa-f]&quot;</span>);</span><br><span class="line"></span><br><span class="line">	<span class="comment">// -----------------</span></span><br><span class="line">	<span class="comment">// Initialize result</span></span><br><span class="line">	<span class="comment">// -----------------</span></span><br><span class="line">	<span class="type">int</span>[] result;</span><br><span class="line">	result = <span class="keyword">new</span> <span class="title class_">int</span>[bytes.length];</span><br><span class="line"></span><br><span class="line">	<span class="comment">// -------------</span></span><br><span class="line">	<span class="comment">// Convert bytes</span></span><br><span class="line">	<span class="comment">// -------------</span></span><br><span class="line">	<span class="type">int</span> counter;</span><br><span class="line">	<span class="keyword">for</span> (counter = <span class="number">0</span>; counter &lt; bytes.length; counter++)</span><br><span class="line">		result[counter] = Integer.parseInt(bytes[counter], <span class="number">16</span>);</span><br><span class="line"></span><br><span class="line">	<span class="comment">// ----</span></span><br><span class="line">	<span class="comment">// Done</span></span><br><span class="line">	<span class="comment">// ----</span></span><br><span class="line">	<span class="keyword">return</span> (result);</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// octetString 转 Date</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> Date <span class="title function_">octetStringToDate</span><span class="params">(String value_ipar)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">	<span class="comment">// ---------------------------</span></span><br><span class="line">	<span class="comment">// Convert into array of bytes</span></span><br><span class="line">	<span class="comment">// ---------------------------</span></span><br><span class="line">	<span class="type">int</span>[] bytes;</span><br><span class="line">	bytes = octetStringToBytes(value_ipar);</span><br><span class="line"></span><br><span class="line">	<span class="comment">// -----------------------</span></span><br><span class="line">	<span class="comment">// Maybe nothing specified</span></span><br><span class="line">	<span class="comment">// -----------------------</span></span><br><span class="line">	<span class="keyword">if</span> (bytes[<span class="number">0</span>] == <span class="number">0</span>)</span><br><span class="line">		<span class="keyword">return</span> (<span class="literal">null</span>);</span><br><span class="line"></span><br><span class="line">	<span class="comment">// ------------------</span></span><br><span class="line">	<span class="comment">// Extract parameters</span></span><br><span class="line">	<span class="comment">// ------------------</span></span><br><span class="line">	<span class="type">int</span> year;</span><br><span class="line">	<span class="type">int</span> month;</span><br><span class="line">	<span class="type">int</span> day;</span><br><span class="line">	<span class="type">int</span> hour;</span><br><span class="line">	<span class="type">int</span> minute;</span><br><span class="line">	<span class="type">int</span> second;</span><br><span class="line">	<span class="type">int</span> <span class="variable">deci_sec</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line">	<span class="type">int</span> <span class="variable">offset</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line">	year = (bytes[<span class="number">0</span>] * <span class="number">256</span>) + bytes[<span class="number">1</span>];</span><br><span class="line">	month = bytes[<span class="number">2</span>];</span><br><span class="line">	day = bytes[<span class="number">3</span>];</span><br><span class="line">	hour = bytes[<span class="number">4</span>];</span><br><span class="line">	minute = bytes[<span class="number">5</span>];</span><br><span class="line">	second = bytes[<span class="number">6</span>];</span><br><span class="line">	<span class="keyword">if</span> (bytes.length &gt;= <span class="number">8</span>)</span><br><span class="line">		deci_sec = bytes[<span class="number">7</span>];</span><br><span class="line">	<span class="keyword">if</span> (bytes.length &gt;= <span class="number">10</span>) &#123;</span><br><span class="line">		offset = bytes[<span class="number">9</span>] * <span class="number">60</span>;</span><br><span class="line">		<span class="keyword">if</span> (bytes.length &gt;= <span class="number">11</span>)</span><br><span class="line">			offset += bytes[<span class="number">10</span>];</span><br><span class="line">		<span class="keyword">if</span> (bytes[<span class="number">8</span>] == <span class="string">&#x27;-&#x27;</span>)</span><br><span class="line">			offset = -offset;</span><br><span class="line">		offset *= <span class="number">60</span> * <span class="number">1000</span>;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// ------------------------------------</span></span><br><span class="line">	<span class="comment">// Get current DST and time zone offset</span></span><br><span class="line">	<span class="comment">// ------------------------------------</span></span><br><span class="line">	Calendar calendar;</span><br><span class="line">	<span class="type">int</span> my_dst;</span><br><span class="line">	<span class="type">int</span> my_zone;</span><br><span class="line">	calendar = Calendar.getInstance();</span><br><span class="line">	my_dst = calendar.get(Calendar.DST_OFFSET);</span><br><span class="line">	my_zone = calendar.get(Calendar.ZONE_OFFSET);</span><br><span class="line"></span><br><span class="line">	<span class="comment">// ----------------------------------</span></span><br><span class="line">	<span class="comment">// Compose result</span></span><br><span class="line">	<span class="comment">// Month to be converted into 0-based</span></span><br><span class="line">	<span class="comment">// ----------------------------------</span></span><br><span class="line">	calendar.clear();</span><br><span class="line">	calendar.set(Calendar.YEAR, year);</span><br><span class="line">	calendar.set(Calendar.MONTH, month - <span class="number">1</span>);</span><br><span class="line">	calendar.set(Calendar.DAY_OF_MONTH, day);</span><br><span class="line">	calendar.set(Calendar.HOUR_OF_DAY, hour);</span><br><span class="line">	calendar.set(Calendar.MINUTE, minute);</span><br><span class="line">	calendar.set(Calendar.SECOND, second);</span><br><span class="line">	calendar.set(Calendar.MILLISECOND, deci_sec * <span class="number">100</span>);</span><br><span class="line"></span><br><span class="line">	<span class="comment">// ---------</span></span><br><span class="line">	<span class="comment">// Reset DST</span></span><br><span class="line">	<span class="comment">// ---------</span></span><br><span class="line">	calendar.add(Calendar.MILLISECOND, my_dst);</span><br><span class="line"></span><br><span class="line">	<span class="comment">// -----------------------------------------------------------------------------------</span></span><br><span class="line">	<span class="comment">// If the offset is set, we have to convert the time using the offset of</span></span><br><span class="line">	<span class="comment">// our time zone</span></span><br><span class="line">	<span class="comment">// -----------------------------------------------------------------------------------</span></span><br><span class="line">	<span class="keyword">if</span> (offset != <span class="number">0</span>) &#123;</span><br><span class="line">		<span class="type">int</span> delta;</span><br><span class="line">		delta = my_zone - offset;</span><br><span class="line">		calendar.add(Calendar.MILLISECOND, delta);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// -------------</span></span><br><span class="line">	<span class="comment">// Return result</span></span><br><span class="line">	<span class="comment">// -------------</span></span><br><span class="line">	<span class="keyword">return</span> (calendar.getTime());</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// octetString 转 中文</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> String <span class="title function_">getChinese</span><span class="params">(String variable)</span> &#123;</span><br><span class="line">	<span class="type">String</span> <span class="variable">result</span> <span class="operator">=</span> variable;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (!variable.contains(<span class="string">&quot;:&quot;</span>)) &#123;</span><br><span class="line">		<span class="keyword">return</span> result;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (variable.length() == <span class="number">23</span> || variable.length() == <span class="number">32</span>) &#123;</span><br><span class="line">		<span class="keyword">try</span> &#123;</span><br><span class="line">			<span class="keyword">return</span> format.format(octetStringToDate(variable));</span><br><span class="line">		&#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> (result.equals(variable)) &#123;</span><br><span class="line">		<span class="keyword">try</span> &#123;</span><br><span class="line"></span><br><span class="line">			String[] temps = variable.split(<span class="string">&quot;:&quot;</span>);</span><br><span class="line">			<span class="type">byte</span>[] bs = <span class="keyword">new</span> <span class="title class_">byte</span>[temps.length];</span><br><span class="line">			<span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; temps.length; i++)</span><br><span class="line">				bs[i] = (<span class="type">byte</span>) Integer.parseInt(temps[i], <span class="number">16</span>);</span><br><span class="line">			result = <span class="keyword">new</span> <span class="title class_">String</span>(bs, <span class="string">&quot;utf-8&quot;</span>);</span><br><span class="line">		&#125; <span class="keyword">catch</span> (Exception ex) &#123;</span><br><span class="line"></span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> result;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+<p>参考网址：<br><a target="_blank" rel="noopener" href="http://www.cnblogs.com/yuanfy008/p/8046189.html">http://www.cnblogs.com/yuanfy008/p/8046189.html</a><br><a target="_blank" rel="noopener" href="https://blog.csdn.net/appletreesujie/article/details/50752065">https://blog.csdn.net/appletreesujie/article/details/50752065</a><br><a target="_blank" rel="noopener" href="https://forum.huawei.com/enterprise/zh/thread-429027.html">https://forum.huawei.com/enterprise/zh/thread-429027.html</a><br><a target="_blank" rel="noopener" href="http://www.mibdepot.com/cgi-bin/getmib3.cgi?win=mib_a&i=1&n=MSEA-MIB&r=johnsoncontrols&f=msea.mi2&v=v2&t=tree">http://www.mibdepot.com/cgi-bin/getmib3.cgi?win=mib_a&amp;i=1&amp;n=MSEA-MIB&amp;r=johnsoncontrols&amp;f=msea.mi2&amp;v=v2&amp;t=tree</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="https://www.icaca.net/2018/08/snmp4j%E4%B8%AD%E6%96%87%E6%98%BE%E7%A4%BA%E9%97%AE%E9%A2%98%E8%A7%A3%E5%86%B3/" data-id="cltinbbzp0001sipx1qtc27bx" data-title="SNMP4J 中文乱码问题解决" class="article-share-link"><span class="fa fa-share">Teilen</span></a>
+      
+      
+      
+  <ul class="article-tag-list" itemprop="keywords"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/JAVA/" rel="tag">JAVA</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SNMP/" rel="tag">SNMP</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SNMP4J/" rel="tag">SNMP4J</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2018/11/Contenteditable/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Neuer</strong>
+      <div class="article-nav-title">
+        
+          Div Contenteditable 支持 Enter / Ctrl+Enter 换行
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2016/09/Play-Framework1-4-2%E5%BC%95%E5%85%A5MariaDB%E4%BD%BF%E7%94%A8utf8mb4%E7%BC%96%E7%A0%81/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Älter</strong>
+      <div class="article-nav-title">Play Framework1.4.2引入MariaDB使用utf8mb4编码</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Kategorien</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%8F%A4%E8%AF%97/">古诗</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E5%A4%A7%E9%81%93%E8%87%B3%E7%AE%80/">大道至简</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E6%8A%80%E6%9C%AF/">技术</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/%E9%81%93%E5%BE%B7%E7%BB%8F/">道德经</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tags</h3>
+    <div class="widget">
+      <ul class="tag-list" itemprop="keywords"><li class="tag-list-item"><a class="tag-list-link" href="/tags/JAVA/" rel="tag">JAVA</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/MariaDB/" rel="tag">MariaDB</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Play-framework-1-4-2/" rel="tag">Play framework 1.4.2</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Play-1-4-2/" rel="tag">Play! 1.4.2</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SNMP/" rel="tag">SNMP</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/SNMP4J/" rel="tag">SNMP4J</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/hello-world/" rel="tag">hello world</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/html/" rel="tag">html</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/javascript/" rel="tag">javascript</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/utf8mb4/" rel="tag">utf8mb4</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E4%B8%8D%E8%99%9E%E4%B9%8B%E9%9A%99/" rel="tag">不虞之隙</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%8A%A3%E5%B8%81%E9%A9%B1%E9%80%90%E8%89%AF%E5%B8%81/" rel="tag">劣币驱逐良币</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E5%A5%BD%E4%BA%8B%E5%A4%9A%E7%A3%A8/" rel="tag">好事多磨</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%9C%AF/" rel="tag">术</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%9D%8E%E7%99%BD/" rel="tag">李白</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%9D%8E%E7%BF%B1/" rel="tag">李翱</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E6%B1%82%E5%85%A8%E4%B9%8B%E6%AF%81/" rel="tag">求全之毁</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%81%93/" rel="tag">道</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%81%93%E5%BE%B7%E7%BB%8F/" rel="tag">道德经</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/%E9%B2%B6%E9%B1%BC%E6%95%88%E5%BA%94/" rel="tag">鲶鱼效应</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Tag Cloud</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/JAVA/" style="font-size: 10px;">JAVA</a> <a href="/tags/MariaDB/" style="font-size: 10px;">MariaDB</a> <a href="/tags/Play-framework-1-4-2/" style="font-size: 10px;">Play framework 1.4.2</a> <a href="/tags/Play-1-4-2/" style="font-size: 10px;">Play! 1.4.2</a> <a href="/tags/SNMP/" style="font-size: 10px;">SNMP</a> <a href="/tags/SNMP4J/" style="font-size: 10px;">SNMP4J</a> <a href="/tags/hello-world/" style="font-size: 10px;">hello world</a> <a href="/tags/html/" style="font-size: 10px;">html</a> <a href="/tags/javascript/" style="font-size: 10px;">javascript</a> <a href="/tags/utf8mb4/" style="font-size: 10px;">utf8mb4</a> <a href="/tags/%E4%B8%8D%E8%99%9E%E4%B9%8B%E9%9A%99/" style="font-size: 10px;">不虞之隙</a> <a href="/tags/%E5%8A%A3%E5%B8%81%E9%A9%B1%E9%80%90%E8%89%AF%E5%B8%81/" style="font-size: 10px;">劣币驱逐良币</a> <a href="/tags/%E5%A5%BD%E4%BA%8B%E5%A4%9A%E7%A3%A8/" style="font-size: 10px;">好事多磨</a> <a href="/tags/%E6%9C%AF/" style="font-size: 10px;">术</a> <a href="/tags/%E6%9D%8E%E7%99%BD/" style="font-size: 10px;">李白</a> <a href="/tags/%E6%9D%8E%E7%BF%B1/" style="font-size: 10px;">李翱</a> <a href="/tags/%E6%B1%82%E5%85%A8%E4%B9%8B%E6%AF%81/" style="font-size: 10px;">求全之毁</a> <a href="/tags/%E9%81%93/" style="font-size: 20px;">道</a> <a href="/tags/%E9%81%93%E5%BE%B7%E7%BB%8F/" style="font-size: 20px;">道德经</a> <a href="/tags/%E9%B2%B6%E9%B1%BC%E6%95%88%E5%BA%94/" style="font-size: 10px;">鲶鱼效应</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archiv</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/03/">March 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2022/01/">January 2022</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2020/10/">October 2020</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/11/">November 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/08/">August 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">September 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">July 2016</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">letzter Beitrag</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2022/03/%E5%B0%86%E8%BF%9B%E9%85%92/">将进酒 - 李白</a>
+          </li>
+        
+          <li>
+            <a href="/2022/03/%E8%B5%A0%E8%8D%AF%E5%B1%B1%E9%AB%98%E5%83%A7%E6%83%9F%E4%BF%A8%E4%BA%8C%E9%A6%96/">赠药山高僧惟俨二首 - 李翱</a>
+          </li>
+        
+          <li>
+            <a href="/2022/01/%E5%A4%A9%E4%B8%8B%E7%9A%86%E7%9F%A5%E7%BE%8E%E4%B9%8B%E4%B8%BA%E7%BE%8E%EF%BC%8C%E6%81%B6%E5%B7%B2/">天下皆知美之为美 斯恶已</a>
+          </li>
+        
+          <li>
+            <a href="/2020/10/%E9%81%93%E5%8F%AF%E9%81%93%E9%9D%9E%E5%B8%B8%E9%81%93/">道可道 非常道</a>
+          </li>
+        
+          <li>
+            <a href="/2018/11/Contenteditable/">Div Contenteditable 支持 Enter / Ctrl+Enter 换行</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      
+      &copy; 2024 https://www.icaca.net<br>
+      Powered by <a href="https://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+
+<script src="/js/jquery-3.6.4.min.js"></script>
+
+
+
+  
+<script src="/fancybox/jquery.fancybox.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+
+
+
+
+  </div>
+</body>
+</html>
